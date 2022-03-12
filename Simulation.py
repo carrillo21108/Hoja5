@@ -10,7 +10,24 @@ def program(name, env, cpu, ram, io, instructions, velocity):
     global tiempos
     cant_memory = random.randint(1,10)
 
+    print('%s llegando al SO en %f necesita %d de memoria' % (name, env.now, cant_memory))
+    start = env.now
 
+    #Cola memoria
+    yield ram.get(cant_memory)
+
+    print('%s asignado en espacio de memoria en %f' % (name, env.now))
+    print('Espacio en memoria actual: %s' % (ram.level))
+
+
+    print('%s desasignado en espacio de memoria en %f' % (name, env.now))
+    print('Espacio en memoria actual: %s' % (ram.level+cant_memory))
+    yield ram.put(cant_memory)
+
+    tiempo = env.now - start
+    tiempos.append(tiempo)
+    print('%s ha tardado %f en ejecucion' % (name, tiempo))
+    total = total + tiempo
 
 
 def program_generator(env, cpu, ram, io, n, interval, velocity):
