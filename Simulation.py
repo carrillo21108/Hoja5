@@ -18,7 +18,39 @@ def program(name, env, cpu, ram, io, instructions, velocity):
 
     print('%s asignado en espacio de memoria en %f' % (name, env.now))
     print('Espacio en memoria actual: %s' % (ram.level))
+    state=2
 
+    while(state!=0):
+
+        if(state==2):
+            with cpu.request() as req_cpu:
+                print('%s en estado "ready", contiene %d instrucciones' % (name, instructions))
+                yield req_cpu
+
+                print('%s en estado "running" en %f' % (name, env.now))
+                yield env.timeout(1)
+
+                if (instructions < velocity):
+                    instructions = 0
+                else:
+                    instructions = instructions - velocity
+
+                print('%s sale de cpu a las %f' % (name, env.now))
+                if (instructions != 0):
+                    state = random.randint(1, 2)
+
+        elif(state==1):
+            with io.request() as req_io:
+                print('%s en estado "waiting", contiene %d instrucciones' % (name, instructions))
+                yield req_cpu
+                yield env.timeout(random.randint(1,5))
+
+                print('%s sale de la cola "waiting" a las %f' % (name, env.now))
+                state = 2
+
+        if(instructions==0):
+            state=0
+            print('%s en estado "terminated" en %f' % (name, env.now))
 
     print('%s desasignado en espacio de memoria en %f' % (name, env.now))
     print('Espacio en memoria actual: %s' % (ram.level+cant_memory))
